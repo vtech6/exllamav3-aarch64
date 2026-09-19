@@ -1,5 +1,6 @@
 import importlib.util
 import os
+import platform
 
 from setuptools import setup
 
@@ -61,7 +62,16 @@ sources = [
     for root, _, files in os.walk(sources_dir)
     for file in files
     if file.endswith(('.c', '.cpp', '.cu'))
+    # The aarch64 stub for moe_mul1.cpp is added explicitly below on non-x86
+    and file != "moe_mul1_arm_stub.cpp"
 ]
+
+if platform.machine() != "x86_64":
+    # The CPU MoE expert GEMM (cpu/moe_mul1.cpp) is x86-only (AVX2/AVX-512 intrinsics);
+    # swap in the API-compatible stub so the extension builds on e.g. aarch64.
+    moe_mul1 = os.path.join(library_dir, extension_name, "cpu", "moe_mul1.cpp")
+    if moe_mul1 in sources:
+        sources[sources.index(moe_mul1)] = os.path.join(library_dir, extension_name, "cpu", "moe_mul1_arm_stub.cpp")
 
 setup_kwargs = (
     {

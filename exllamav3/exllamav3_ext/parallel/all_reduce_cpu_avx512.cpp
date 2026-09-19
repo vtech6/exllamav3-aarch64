@@ -1,3 +1,5 @@
+#if defined(__x86_64__)
+
 #include <immintrin.h>
 #include "all_reduce_cpu_avx512.h"
 #include "all_reduce_cpu_avx2.h"
@@ -418,3 +420,47 @@ void perform_cpu_reduce_avx512
         chunk_idx++;
     }
 }
+
+#else
+
+// Non-x86 (e.g. aarch64): AVX-512 kernels unavailable. Stubs so the extension links;
+// call sites are gated on is_avx512_supported().
+#include <torch/extension.h>
+#include "all_reduce_cpu_avx512.h"
+
+void enable_fast_fp_avx512() {}
+
+void bf16_add_inplace_avx512(uint16_t* __restrict a, const uint16_t* __restrict b, size_t count)
+{
+    TORCH_CHECK(false, "AVX-512 is not available on this platform");
+}
+
+void bf16_add_twosrc_avx512(uint16_t* __restrict dst, const uint16_t* __restrict src_a, const uint16_t* __restrict src_b, size_t count)
+{
+    TORCH_CHECK(false, "AVX-512 is not available on this platform");
+}
+
+void fp16_add_inplace_avx512(uint16_t* __restrict a, const uint16_t* __restrict b, size_t count)
+{
+    TORCH_CHECK(false, "AVX-512 is not available on this platform");
+}
+
+void fp16_add_twosrc_avx512(uint16_t* __restrict dst, const uint16_t* __restrict src_a, const uint16_t* __restrict src_b, size_t count)
+{
+    TORCH_CHECK(false, "AVX-512 is not available on this platform");
+}
+
+void perform_cpu_reduce_avx512
+(
+    PGContext* ctx,
+    size_t data_size,
+    uint32_t device_mask,
+    uint32_t wire_dtype,
+    uint8_t* shbuf_ptr,
+    size_t shbuf_size
+)
+{
+    TORCH_CHECK(false, "CPU all-reduce requires x86 with AVX-512");
+}
+
+#endif

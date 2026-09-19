@@ -109,10 +109,12 @@ void run_cpu_reduce_jobs
                 break;
             if (++spins < 65536)
             {
-                #ifdef __linux__
-                    __builtin_ia32_pause();
-                #else
-                    _mm_pause();
+                #if defined(__x86_64__)
+                    #ifdef __linux__
+                        __builtin_ia32_pause();
+                    #else
+                        _mm_pause();
+                    #endif
                 #endif
                 continue;
             }

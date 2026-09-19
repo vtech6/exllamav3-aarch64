@@ -149,10 +149,12 @@ namespace {
 
 inline void cpu_pause_()
 {
+#if defined(__x86_64__)
 #ifdef __linux__
     __builtin_ia32_pause();
 #else
     _mm_pause();
+#endif
 #endif
 }
 

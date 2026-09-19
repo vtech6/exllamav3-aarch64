@@ -1,5 +1,7 @@
 #include "avx2_target.h"
 
+#if defined(__x86_64__)
+
 bool is_avx2_supported()
 {
     static bool avx2_check = false;
@@ -32,3 +34,11 @@ bool is_f16c_supported()
     f16c_check = true;
     return f16c_supported;
 }
+
+#else
+
+// Non-x86 (e.g. aarch64): no AVX2/F16C
+bool is_avx2_supported() { return false; }
+bool is_f16c_supported() { return false; }
+
+#endif

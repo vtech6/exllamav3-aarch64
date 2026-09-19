@@ -1,3 +1,5 @@
+#if defined(__x86_64__)
+
 #include <immintrin.h>
 #include "all_reduce_cpu_avx2.h"
 #include "all_reduce_cpu_avx512.h"
@@ -397,3 +399,55 @@ void perform_cpu_reduce_avx2
         chunk_idx++;
     }
 }
+
+#else
+
+// Non-x86 (e.g. aarch64): CPU tensor-parallel all-reduce requires AVX2 and is unavailable.
+// Stubs so the extension links; call sites are gated on is_avx2_supported().
+#include <torch/extension.h>
+#include "all_reduce_cpu_avx2.h"
+
+void enable_fast_fp() {}
+void enable_fast_fp_avx2() {}
+
+void perform_cpu_reduce
+(
+    PGContext* ctx,
+    size_t data_size,
+    uint32_t device_mask,
+    uint32_t wire_dtype,
+    uint8_t* shbuf_ptr,
+    size_t shbuf_size
+)
+{
+    TORCH_CHECK(false, "CPU all-reduce requires x86 with AVX2");
+}
+
+void perform_cpu_reduce_avx2
+(
+    PGContext* ctx,
+    size_t data_size,
+    uint32_t device_mask,
+    uint32_t wire_dtype,
+    uint8_t* shbuf_ptr,
+    size_t shbuf_size
+)
+{
+    TORCH_CHECK(false, "CPU all-reduce requires x86 with AVX2");
+}
+
+void cpu_reduce_parallel
+(
+    void (*fn3)(uint16_t*, const uint16_t*, const uint16_t*, size_t),
+    void (*fn2)(uint16_t*, const uint16_t*, size_t),
+    uint16_t* dst,
+    const uint16_t* a,
+    const uint16_t* b,
+    size_t count,
+    int threads
+)
+{
+    TORCH_CHECK(false, "CPU all-reduce requires x86 with AVX2");
+}
+
+#endif
